@@ -167,15 +167,73 @@ exp(meta$ci.ub)
 # for all studies
 # quite close
 
-# and reported number of studies
+# and reported number of studies (Table 1)
 expect_equal( nrow(d), 140)
 
-# recode effect sizes as positive since they are reporting a negative effect
-d$yi = -1 * d$yi
-d$flipped = TRUE 
+# reported number of papers
+# hmmm
+# their study variable seems a bit messy?
+# ~~~ look at this again
+expect_equal( length(unique(d$study)), 97)
+
+
+# # recode effect sizes as positive since they are reporting a negative effect
+# d$yi = -1 * d$yi
+# d$flipped = TRUE 
 
 # write the prepped data
 setwd(private.data.dir)
 write.csv(d, "flegal_prepped.csv")
+
+
+####################### GLOBAL BMI CONSORTIUM [GBC]: PREP AUTHOR-PROVIDED DATA ####################### 
+
+setwd(private.data.dir)
+setwd("From Emanuele")
+d = read.csv("gbmic_rr_acm_by_cohort.csv")
+
+
+names(d)[ names(d) == "study_name" ] = "study"
+names(d)[ names(d) == "lnrr" ] = "yi"
+d$vi = d$selnrr^2
+
+# sanity check for dose-response
+# as expected, category 3 is the reference
+d %>% group_by(bmicat) %>%
+  summarize( exp(mean(yi)) )
+
+# for us, keep only the overweight category
+d = d[ d$bmicat == 3, ]
+
+# sanity check
+( meta = rma.uni( yi = d$yi,
+                  vi = d$vi, 
+                  method = "DL",
+                  knha = FALSE ) )
+exp(meta$b)  # inverse because we reversed signs
+exp(meta$ci.lb)
+exp(meta$ci.ub)
+# this is not equivalent to the analysis they did, but yields
+#  HR = 1.07 [1.05, 1.09]
+# similar to their 1.11 [1.10, 1.11] in Table 2
+
+# number of studies
+nrow(d)
+
+# number of papers vs. reported in Table 2 legend
+# hmmm
+# ~~~ look at this again
+expect_equal( length(unique(d$study)), 189)
+
+
+# recode effect sizes as positive since they are reporting a negative effect
+d$flipped = FALSE 
+
+# write the prepped data
+setwd(private.data.dir)
+write.csv(d, "gbc_prepped.csv")
+
+
+
 
 
