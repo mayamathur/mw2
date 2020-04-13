@@ -6,7 +6,6 @@ private.data.dir = "~/Dropbox/Personal computer/Independent studies/2020/Metasen
 results.dir = "~/Dropbox/Personal computer/Independent studies/2020/Metasens tutorial/Linked to OSF (Metasens tutorial)/Results from R"
   
 library(MetaUtility)
-library(EValue)
 library(ggplot2)
 library(dplyr)
 library(metafor)

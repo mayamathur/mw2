@@ -1,5 +1,5 @@
 
-
+# NOT IN USE ANYMORE
 # works with the global variable resE
 analyze_one_meta = function( dat,
                              
@@ -178,15 +178,12 @@ analyze_one_meta = function( dat,
   TG.df = do.call( rbind,
                    TG.l )
   
-
   
   ##### Phat(B) Plots #####
   
   # here we need to make a decision
   # 1. always do calibrated plot with sigma^2B=0 so that we don't have to cut off plot
   # 2. if effects are normal, also do parametric plot with sigma^2B>0, but cut off plot at 0.15 and 0.85
-  
-
   
   for (i in length(ql)) {
     
@@ -200,6 +197,12 @@ analyze_one_meta = function( dat,
                      boot.reps = boot.reps,
                      dat = dat )  # from analyze.R
     
+    setwd(results.dir)
+    ggsave( filename = paste( meta.name, "_", "sens_calib_expq", exp(ql[[i]]), "_homoB.png", sep="" ),
+            width = 5,
+            height = 4,
+            units = "in")
+    
     # heterogeneous bias vs. parametric Phat, but cutting off extreme Phats
     sens_plot_para( type = "line",
                     q = ql[[i]],
@@ -207,18 +210,23 @@ analyze_one_meta = function( dat,
                     Bmax = log(Bmax),
                     sigB = sigB[2],
                     breaks.x1 = breaks.x1,
+                    tail = tail[[i]],
                     
                     yr = meta$b,
                     vyr = meta$se^2,
                     t2 = meta$tau2,
                     vt2 = meta$se.tau2^2,
                     
-                    est.type = "HR" )
+                    est.type = est.type )
+    
+    setwd(results.dir)
+    ggsave( filename = paste( meta.name, "_", "sens_para_expq", exp(ql[[i]]), "_heteroB.png", sep="" ),
+            width = 5,
+            height = 4,
+            units = "in")
     
   }
   
-
-
   
   ##### E-value for Point Estimate #####
   
@@ -277,8 +285,10 @@ analyze_one_meta = function( dat,
   # That and Ghat
   That.names = paste( "That ", tail, " ", q.vec, sep = "" )
   Ghat.names = paste( "Ghat ", tail, " ", q.vec, sep = "" )
-  new.row[ , That.names ] = cm.df$That
-  new.row[ , Ghat.names ] = cm.df$Ghat
+  
+  # bm
+  new.row[ , That.names ] = TG.df$That
+  new.row[ , Ghat.names ] = TG.df$Ghat
   
   # E-value for point estimate and CI
   Eval.est.names = paste( "Eval est ", q.vec, sep = "" )
@@ -566,12 +576,9 @@ That_causal = function( .q,  # on log-RR scale (transformed if needed)
       Note <<- err$message
     })
     
-    #browser()
-    
     if ( is.null(lo) ) lo2 = c(NA, NA) else lo2 = c(lo, g(lo))
     if ( is.null(hi) ) hi2 = c(NA, NA) else hi2 = c(hi, g(hi))
 
-    # bm
     return( data.frame( Stat = c("That", "Ghat"),
                         Est = c(That, Ghat),
                         SE = c(SE, NA),  # ~~~ for MM's future reference: for latter, could replace with delta method if SE were actually wanted
@@ -693,7 +700,8 @@ sens_plot_para = function( type,
       # r is irrelevant here
       cm = confounded_meta(q, r=0.10, muB=t$B[i], sigB,
                            yr, vyr, t2, vt2,
-                           CI.level=CI.level)
+                           CI.level=CI.level,
+                           tail = tail)
       t$phat[i] = cm$Est[ cm$Value=="Prop" ]
       t$lo[i] = cm$CI.lo[ cm$Value=="Prop" ]
       t$hi[i] = cm$CI.hi[ cm$Value=="Prop" ]
