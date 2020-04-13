@@ -39,6 +39,8 @@ analyze_one_meta = function( dat,
   est.type = "HR"
   
   
+  
+  
   ##### Regular Meta-Analysis #####
   ( meta = rma.uni( yi = dat$yi, 
                     vi = dat$vi, 
@@ -176,10 +178,7 @@ analyze_one_meta = function( dat,
   TG.df = do.call( rbind,
                    TG.l )
   
-  
-  
-  
-  
+
   
   ##### Phat(B) Plots #####
   
@@ -187,52 +186,38 @@ analyze_one_meta = function( dat,
   # 1. always do calibrated plot with sigma^2B=0 so that we don't have to cut off plot
   # 2. if effects are normal, also do parametric plot with sigma^2B>0, but cut off plot at 0.15 and 0.85
   
-  # so need to use both sens_plot fns
-  
-  # bm: was working on the calibrated sens_plot
-  
-  # also added est.type argument to relabel y-axis
-sens_plot_para = function( type,
-                           q,
-                           muB=NA,
-                           Bmin=log(1),
-                           Bmax=log(5),
-                           sigB=0,
-                           yr,
-                           vyr=NA,
-                           t2,
-                           vt2=NA,
-                           breaks.x1=NA,
-                           breaks.x2=NA,
-                           est.type = "RR",
-                           CI.level=0.95 )
-  
-  sens_plot_calib = function(.q,
-                           .B.vec,
-                           .tail,
-                           .causative,
-                           .est.type )
 
   
-##### Make Plotting Dataframe #####
-.B.vec = seq( 1, Bmax, 0.01 )
-.r = r
-.q = ql[[2]]
-.tail = tail[[2]]
-.causative = mu>0
-.est.type = "HR"
+  for (i in length(ql)) {
+    
+    # ASSUMES ONLY 2 VALUES OF SIGB AND THAT THE SECOND ONE IS HETEROGENEOUS
+    # homogeneous bias vs. parametric Phat, showing full range of Phats
+    sens_plot_calib( q = ql[[i]],
+                     B.vec = seq(1, 1.3, .01),
+                     tail = tail[[i]],
+                     causative = (mu>0),
+                     est.type = est.type,
+                     boot.reps = boot.reps,
+                     dat = dat )  # from analyze.R
+    
+    # heterogeneous bias vs. parametric Phat, but cutting off extreme Phats
+    sens_plot_para( type = "line",
+                    q = ql[[i]],
+                    Bmin = log(1),
+                    Bmax = log(Bmax),
+                    sigB = sigB[2],
+                    breaks.x1 = breaks.x1,
+                    
+                    yr = meta$b,
+                    vyr = meta$se^2,
+                    t2 = meta$tau2,
+                    vt2 = meta$se.tau2^2,
+                    
+                    est.type = "HR" )
+    
+  }
+  
 
-ind = 1
-
-
-# bm
-
-sens_plot_calib( .q = ql[[2]],
-                 .B.vec = .B.vec,
-                 .tail = tail[[1]],
-                 .causative = .causative,
-                 .est.type = .est.type,
-                 .dat = dat )
 
   
   ##### E-value for Point Estimate #####
@@ -629,7 +614,7 @@ That_causal_bt = function( original,
 
 ############################### SENSITIVITY PLOT FNS ############################### 
 
-###### Modified from Evalue package (just the x-axis breaks) #####
+###### Modified from Evalue package #####
 
 # changed breaks
 # also added est.type argument to relabel y-axis
@@ -643,6 +628,7 @@ sens_plot_para = function( type,
                            vyr=NA,
                            t2,
                            vt2=NA,
+                           tail,
                            breaks.x1=NA,
                            breaks.x2=NA,
                            est.type = "RR",
@@ -749,7 +735,7 @@ sens_plot_para = function( type,
                                                 breaks=breaks.x2 ) ) +
       geom_line(lwd=1.2) +
       xlab("Bias factor (RR scale)") +
-      ylab( paste( ifelse( yr > log(1),
+      ylab( paste( ifelse( tail == "above",
                            paste( "Estimated proportion of studies with true", est.type, " >", round( exp(q), 3 ) ),
                            paste( "Estimated proportion of studies with true", est.type, " <", round( exp(q), 3 ) ) ) ) )
     
@@ -762,31 +748,29 @@ sens_plot_para = function( type,
   }
 }
 
-# test it
-# bm
-dat = dfs[[1]]
-meta = rma.uni( yi = dat$yi, 
-                    vi = dat$vi, 
-                    method = "REML", 
-                    knha = TRUE )
-
-breaks.x1 = seq(1, 1.20, .05)
-breaks.x2 = g(breaks.x1)
-sens_plot_para( type = "line",
-                q = log(1),
-                Bmin = log(1),
-                Bmax = log(2),
-                sigB = .1,
-                breaks.x1 = breaks.x1,
-                
-                yr = meta$b,
-                vyr = meta$se^2,
-                t2 = meta$tau2,
-                vt2 = meta$se.tau2^2,
-                
-                est.type = "HR" )
-
-
+# # test it
+# # bm
+# dat = dfs[[1]]
+# meta = rma.uni( yi = dat$yi, 
+#                     vi = dat$vi, 
+#                     method = "REML", 
+#                     knha = TRUE )
+# 
+# breaks.x1 = seq(1, 1.20, .05)
+# breaks.x2 = g(breaks.x1)
+# sens_plot_para( type = "line",
+#                 q = log(1),
+#                 Bmin = log(1),
+#                 Bmax = log(2),
+#                 sigB = .1,
+#                 breaks.x1 = breaks.x1,
+#                 
+#                 yr = meta$b,
+#                 vyr = meta$se^2,
+#                 t2 = meta$tau2,
+#                 vt2 = meta$se.tau2^2,
+#                 
+#                 est.type = "HR" )
 
 
 sens_plot_calib = function(q,
@@ -876,16 +860,14 @@ sens_plot_calib = function(q,
 }
 
 
-# test it
-sens_plot_calib( q = log(.9),
-                 B.vec = seq(1, 1.3, .01),
-                 tail = "below",
-                 causative = FALSE,
-                 est.type = "HR",
-                 boot.reps = 200,
-                 dat = dfs[[1]] )  # from analyze.R
-
-
+# # test it
+# sens_plot_calib( q = log(.9),
+#                  B.vec = seq(1, 1.3, .01),
+#                  tail = "below",
+#                  causative = FALSE,
+#                  est.type = "HR",
+#                  boot.reps = 200,
+#                  dat = dfs[[1]] )  # from analyze.R
 
 
 
