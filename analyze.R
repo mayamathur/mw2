@@ -27,6 +27,24 @@ boot.reps = 300  # ~~ increase later!
 # start results df from scratch
 rm("resE")
 
+####################### NORMALITY ASSUMPTION ####################### 
+
+# investigate normality for each meta-analysis
+# all seem nicely normal :)
+for ( dat in dfs ){
+  
+  dat$calib = calib_ests( yi = dat$yi,
+                          sei = sqrt(dat$vi) )
+  
+  print( shapiro.test(dat$calib) )
+  
+  qqnorm(dat$calib)
+  qqline(dat$calib, col = "red")
+}
+
+
+####################### MAIN ANALYSES ####################### 
+
 
 # maybe use same Bmax throughout so that the plots are more clear?
 
