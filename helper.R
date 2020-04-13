@@ -715,7 +715,11 @@ sens_plot_para = function( type,
     
     # cut off values for which we don't want to calculate a parametric CI
     t = t %>% filter( phat > 0.15 & phat < 0.85 )
-    
+    # also resent Bmin and Bmax to cut off plot
+    Bmin = min(t$B)
+    Bmax = max(t$B)
+      
+      
     # compute values of g for the dual X-axis
     if ( any( is.na(breaks.x1) ) ) breaks.x1 = seq( exp(Bmin), exp(Bmax), .5 )
     if ( any( is.na(breaks.x2) ) ) breaks.x2 = round( breaks.x1 + sqrt( breaks.x1^2 - breaks.x1 ), 2)
@@ -727,9 +731,16 @@ sens_plot_para = function( type,
       x + sqrt( x^2 - x )
     } )
     
+
     p = ggplot2::ggplot( t, aes(x=t$eB, y=t$phat ) ) + theme_bw() +
       scale_y_continuous( limits=c(0,1),
                           breaks=seq(0, 1, .1) ) +
+      
+      # scale_x_continuous(  
+      #                      
+      #                      sec.axis = sec_axis( ~ g(.),  # confounding strength axis
+      #                                           name = "Minimum strength of both confounding RRs" ) ) +
+     
       scale_x_continuous(  limits = c(min(breaks.x1),
                                       max(breaks.x1)),
                            breaks = breaks.x1,
@@ -759,11 +770,14 @@ meta = rma.uni( yi = dat$yi,
                     method = "REML", 
                     knha = TRUE )
 
+breaks.x1 = seq(1, 1.20, .05)
+breaks.x2 = g(breaks.x1)
 sens_plot_para( type = "line",
-                q = log(.9),
+                q = log(1),
                 Bmin = log(1),
-                Bmax = log(5),
+                Bmax = log(2),
                 sigB = .1,
+                breaks.x1 = breaks.x1,
                 
                 yr = meta$b,
                 vyr = meta$se^2,
