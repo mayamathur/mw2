@@ -22,11 +22,16 @@ dat$calib = calib_ests( yi = dat$yi,
 ##### Check for Bad Arguments Regarding SigB #####
 
 # should not provide both of these
-if ( exists("sigB") & any( !is.na(sigB) ) & any( !is.na(varB.ratio) ) ) stop("Only provide one of sigB and varB.ratio, not both")
 
-if ( exists("sigB") & any( !is.na(sigB) ) & any(sigB > t2) ) stop( paste( "Some sigB > naive t2 of",
-                                                         round(t2,2),
-                                                         sep = " ") )
+if ( exists("sigB") ) {
+  if ( any( !is.na(sigB) ) & any( !is.na(varB.ratio) ) ) stop("Only provide one of sigB and varB.ratio, not both")
+  
+  if ( any( !is.na(sigB) ) & any(sigB > t2) ) stop( paste( "Some sigB > naive t2 of",
+                                                                            round(t2,2),
+                                                                            sep = " ") )
+}
+
+
 
 # calculate absolute sigB if given ratio 
 if ( any( !is.na(varB.ratio) ) ) sigB = sqrt(varB.ratio * t2)
