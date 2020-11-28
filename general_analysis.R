@@ -108,7 +108,6 @@ Phat.df$string = paste( round( 100*Phat.df$Phat.calib,
                         sep = " " )
 
 
-
 ##### That and Ghat - Calibrated #####
 
 TG.l = lapply( X = ql,

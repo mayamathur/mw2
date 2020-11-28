@@ -197,9 +197,26 @@ names(d)[ names(d) == "lnrr" ] = "yi"
 d$vi = d$selnrr^2
 
 # sanity check for dose-response
-# as expected, category 3 is the reference
+# as expected, category 2 is the reference
 d %>% group_by(bmicat) %>%
-  summarize( exp(mean(yi)) )
+  summarize( expmu = exp(mean(yi)) )
+
+# meta-analyze each BMI category
+for ( i in c(1,3,4,5,6) ) {
+  meta = rma.uni( yi = yi,
+                 sei = selnrr,
+                 knha = TRUE,
+                 data = d %>% filter(bmicat == i) )
+  
+  cat( paste( "/n/n~~~~~~~~~~~ BMI CATEGORY", i, ":" ) )
+  print( paste( round( exp(meta$b), 2 ),
+                "[",
+                round( exp(meta$ci.lb), 2 ),
+                ", ",
+                round( exp(meta$ci.ub), 2 ),
+                "]" ) )
+}
+  
 
 # for us, keep only the overweight category
 d = d[ d$bmicat == 3, ]
