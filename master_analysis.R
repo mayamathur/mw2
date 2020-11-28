@@ -17,6 +17,7 @@ dfs = list( read.csv("flegal_prepped.csv"),
                  read.csv("kodama_prepped.csv") )
 
 
+
 # # choose bias SD by looking at a particular cross-section of the plot (muB)
 # B_pct( muB = log(2), sigB = 0.01 )
   
