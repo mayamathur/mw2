@@ -103,11 +103,16 @@ sqrt(t2)
 # example of using R package for the Supplement
 library(EValue)
 
+# E-value
+evalue( est = RR( exp(meta$b) ),
+        lo = RR( exp(meta$ci.lb) ),
+        hi = RR( exp(meta$ci.ub) ) )
 
 # homogeneous bias
 confounded_meta( method = "calibrated",
                  q = log(1.1),
                  r = 0.15,
+                 tail = "above",
                  muB = 0,
                  dat = dat,
                  yi.name = "yi",
