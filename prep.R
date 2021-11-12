@@ -46,9 +46,6 @@ source("helper.R")
 # no sci notation
 options(scipen=999)
 
-# get raw data
-setwd(private.data.dir)
-
 
 
 # FLEGAL: PREP AUTHOR-PROVIDED DATA ---------------------------------------------------
