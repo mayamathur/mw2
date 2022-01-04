@@ -15,3 +15,5 @@ my_ggsave = function(name,
           width = width, 
           height = height)
 }
+
+nuni = function(x) length(unique(x))

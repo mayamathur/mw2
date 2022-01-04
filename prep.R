@@ -79,13 +79,29 @@ exp(meta$ci.ub)
 # for all studies
 # quite close
 
-# and reported number of studies (Table 1)
+
+### Sanity checks: number of studies ###
+# number of estimates matches theirs (Table 1)
 expect_equal( nrow(d), 140)
 
-# reported number of papers doesn't quite match theirs
+
+### Sanity checks: number of articles ###
+# apparent number of papers (94) doesn't quite match theirs (97)
 # their study variable seems a bit messy?
 expect_equal( length(unique(d$study)), 97)
 
+# try to clean up the study variable
+x = str_split(string = d$study, pattern = " ")
+firstAuthor = unlist( lapply( x, function(.x) .x[1] ) )
+nuni(firstAuthor)
+# the years contain letters to distinguish multiple papers with same author and year
+yearString = unlist( lapply( x, function(.x) .x[ length(.x) ] ) )
+yearNumeric = parse_number(yearString)
+# look at parsing failures
+# these are studies for which no year was included in "study" variable
+d$study[ is.na(yearNumeric) ]
+# still doesn't quite match
+expect_equal( nuni(myStudy), 97)
 
 # write the prepped data
 setwd(private.data.dir)
@@ -108,7 +124,7 @@ d$vi = d$selnrr^2
 d %>% group_by(bmicat) %>%
   summarize( expmu = exp(mean(yi)) )
 
-# meta-analyze each BMI category
+# meta-analyze each BMI category (standard categories, not the finer-grained ones)
 for ( i in c(1,3,4,5,6) ) {
   meta = rma.uni( yi = yi,
                  sei = selnrr,
@@ -139,6 +155,7 @@ exp(meta$ci.ub)
 # this is not equivalent to the analysis they did, but yields
 #  HR = 1.07 [1.05, 1.09]
 # similar to their 1.11 [1.10, 1.11] in Table 2
+# and very close to what they got in Supplement (page 16) when using 213 studies
 
 # number of studies
 nrow(d)
@@ -146,6 +163,15 @@ nrow(d)
 # number of papers vs. reported in Table 2 legend
 # also does not quite agree
 expect_equal( length(unique(d$study)), 189)
+
+# compare to eTable 2 (list of "studies")
+# but note that table might still contain the full 239 studies, including those that did contribute any participants to main analyses
+sort( unique(d$study) )
+
+# I also confirmed by reading through the above list that the 2 studies with <10 deaths
+#  (per Supplement page 10 legend) are indeed already excluded:
+#  1. Capital Iron & Steel Company Hospital Cohort (but note that Capital Iron & Steel Company STUDY is okay)
+# 2. Risk Factors and Life Expectancy Pooling Project (GREPCO)
 
 
 # recode effect sizes as positive since they are reporting a negative effect
