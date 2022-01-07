@@ -66,7 +66,7 @@ names(d)[ names(d) == "vyi" ] = "vi"
 # remove blank rows at end
 d = d[ !is.na(d$EntrezUID), ]
 
-# sanity check vs. reported
+### Sanity check: Reproduce reported pooled estimate ###
 ( meta = rma.uni( yi = d$yi,
                   vi = d$vi, 
                   method = "DL",
@@ -87,7 +87,7 @@ expect_equal( nrow(d), 140)
 
 ### Sanity checks: number of articles ###
 # apparent number of papers (94) doesn't quite match theirs (97)
-# their study variable seems a bit messy?
+# but the study variable seems a bit messy
 expect_equal( length(unique(d$study)), 97)
 
 # try to clean up the study variable
@@ -114,10 +114,13 @@ setwd(private.data.dir)
 setwd("From Emanuele")
 d = read.csv("gbmic_rr_acm_by_cohort.csv")
 
-
+# rename variables
 names(d)[ names(d) == "study_name" ] = "study"
 names(d)[ names(d) == "lnrr" ] = "yi"
 d$vi = d$selnrr^2
+
+### Sanity check: Reproduce reported pooled estimates ###
+# but note, per eAppendix, that our analysis is different (e.g., not multivariate)
 
 # sanity check for dose-response
 # as expected, category 2 is the reference
@@ -125,6 +128,7 @@ d %>% group_by(bmicat) %>%
   summarize( expmu = exp(mean(yi)) )
 
 # meta-analyze each BMI category (standard categories, not the finer-grained ones)
+# this is close to eTable 4, "All Studies", final row
 for ( i in c(1,3,4,5,6) ) {
   meta = rma.uni( yi = yi,
                  sei = selnrr,
@@ -144,7 +148,9 @@ for ( i in c(1,3,4,5,6) ) {
 # for us, keep only the overweight category
 d = d[ d$bmicat == 3, ]
 
-# sanity check
+### Another sanity check: Reproduce reported pooled estimate for overweight only ###
+# uses DL rather than REML with KNHA, as in our main analysis, just for the sanity check since
+#  former is more common
 ( meta = rma.uni( yi = d$yi,
                   vi = d$vi, 
                   method = "DL",
@@ -153,29 +159,16 @@ exp(meta$b)  # inverse because we reversed signs
 exp(meta$ci.lb)
 exp(meta$ci.ub)
 # this is not equivalent to the analysis they did, but yields
-#  HR = 1.07 [1.05, 1.09]
-# similar to their 1.11 [1.10, 1.11] in Table 2
-# and very close to what they got in Supplement (page 16) when using 213 studies
-
-# number of studies
-nrow(d)
-
-# number of papers vs. reported in Table 2 legend
-# also does not quite agree
-expect_equal( length(unique(d$study)), 189)
-
-# compare to eTable 2 (list of "studies")
-# but note that table might still contain the full 239 studies, including those that did contribute any participants to main analyses
-sort( unique(d$study) )
-
-# I also confirmed by reading through the above list that the 2 studies with <10 deaths
-#  (per Supplement page 10 legend) are indeed already excluded:
-#  1. Capital Iron & Steel Company Hospital Cohort (but note that Capital Iron & Steel Company STUDY is okay)
-# 2. Risk Factors and Life Expectancy Pooling Project (GREPCO)
+#  HR = 1.10 [1.07, 1.12]
+# reported: HR = 1.11 [1.10, 1.11] in Table 2 and eTable 4 with 189 studies
+# similar given differences in analysis
 
 
-# recode effect sizes as positive since they are reporting a negative effect
-#d$flipped = FALSE 
+# number of papers vs. reported in Table 2 legend (189)
+# below, the "-3" is because, per authors:
+# "One study (FINRISK) provided adjusted results for their 4 cohorts combined (FINRISK77, FINRISK82, FINRISK87 and North Karalia study), thus you needed to add 3 to the number of cohorts in the study labelled as "Finrisk Cohort 1977"
+expect_equal( length(unique(d$study)), 189-3)
+
 
 # write the prepped data
 setwd(private.data.dir)

@@ -238,7 +238,7 @@ confounded_meta( method = "calibrated",
                  q = log(0.90),
                  r = 0.15,
                  tail = "below",
-                 muB = 0,
+                 muB = 0,  # no bias
                  sigB = 0,
                  dat = dat,
                  yi.name = "yi",
@@ -249,7 +249,7 @@ confounded_meta( method = "calibrated",
                  q = log(1.1),
                  r = 0.15,
                  tail = "above",
-                 muB = 0,
+                 muB = 0,  # no bias
                  sigB = 0,
                  dat = dat,
                  yi.name = "yi",
@@ -289,16 +289,17 @@ my_ggsave( name = "gbc_line_plot.pdf",
            .overleaf.dir = overleaf.dir )
 
 # ~ Heterogeneous bias (Supplement)  -----------------------
-# the 1.01 is chosen to avoid going below 15% and hence compromising parametric estimation
+# the 1.03 is chosen to come close to Flegal
 confounded_meta( method = "parametric",
                  q = log(1.1),
                  tail = "above",
-                 muB = log(1.01),
+                 muB = log(1.03),
                  sigB = sqrt( 0.8 * meta$tau2 ),
                  yr = meta$b,
                  vyr = meta$se^2,
                  t2 = meta$tau2,
                  vt2 = meta$se.tau2^2 )
+
 
 
 
