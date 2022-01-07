@@ -165,20 +165,32 @@ confounded_meta( method = "calibrated",
 
 
 # ~~ Sensitivity plot (homogeneous bias) -----------------------
+
 # note: y-axis will automatically say "RR"; manually edited PDF to say "HR" but would
 #  be easy to do it here
+breaks.x1 = seq(1, 2, .1)
 p = sens_plot( type = "line",
                method = "calibrated",
                give.CI = TRUE,
                q = log(0.90),
                tail = "below",
                Bmax = log(1.5),
-               breaks.x1 = seq(1, 2, .1),
+               breaks.x1 = breaks.x1,
                dat = dat,
                yi.name = "yi",
                vi.name = "vi" )
 
 p = p + ylab("Estimated proportion of studies with true HR < 0.9")
+
+# put x-axis on log scale
+# from inside sens_plot:
+breaks.x2 = round(breaks.x1 + sqrt(breaks.x1^2 - 
+                                     breaks.x1), 2)
+p = p + scale_x_continuous( breaks = breaks.x1, 
+                              sec.axis = sec_axis(~g(.),
+                                                  name = "Minimum strength of both confounding RRs", 
+                                                  breaks = breaks.x2),
+                              trans = "log10")
 
 my_ggsave( name = "flegal_line_plot.pdf",
            width = 4,
@@ -245,18 +257,30 @@ confounded_meta( method = "calibrated",
 
 
 # ~~ Sensitivity plot (homogeneous bias) -----------------------
+breaks.x1 = seq(1, 2, .1)
 p = sens_plot( type = "line",
                method = "calibrated",
                give.CI = TRUE,
                q = log(1.1),
                tail = "above",
                Bmax = log(1.5),
-               breaks.x1 = seq(1, 2, .1),
+               breaks.x1 = breaks.x1,
                dat = dat,
                yi.name = "yi",
                vi.name = "vi" )
 
 p = p + ylab("Estimated proportion of studies with true HR > 1.1")
+
+# put x-axis on log scale
+# from inside sens_plot:
+breaks.x2 = round(breaks.x1 + sqrt(breaks.x1^2 - 
+                                     breaks.x1), 2)
+p = p + scale_x_continuous( breaks = breaks.x1, 
+                            sec.axis = sec_axis(~g(.),
+                                                name = "Minimum strength of both confounding RRs", 
+                                                breaks = breaks.x2),
+                            trans = "log10")
+
 
 my_ggsave( name = "gbc_line_plot.pdf",
            width = 4,
