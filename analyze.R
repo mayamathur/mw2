@@ -1,11 +1,6 @@
 
-# Note: Results produced by this script may differ slightly from those presented in the main text.
-#  Results in the main text were from the website, for which we had used rounded values as inputs.
-#  Here we use exact inputs. Also, confidence intervals produced by bootstrapping can differ slightly 
+# Note: Confidence intervals produced by bootstrapping can differ slightly 
 #  across multiple runs. 
-
-rm( list = ls() )
-
 
 
 # PRELIMINARIES ---------------------------------------------------
@@ -199,7 +194,7 @@ my_ggsave( name = "flegal_line_plot.pdf",
            .overleaf.dir = overleaf.dir )
 
 # ~  Heterogeneous bias -----------------------
-# heterogeneous bias (Supplement)
+# heterogeneous bias (data not shown in paper)
 # the 1.02 is chosen to avoid going below 15% and hence compromising parametric estimation
 confounded_meta( method = "parametric",
                  q = log(0.90),
@@ -288,7 +283,7 @@ my_ggsave( name = "gbc_line_plot.pdf",
            .results.dir = results.dir,
            .overleaf.dir = overleaf.dir )
 
-# ~ Heterogeneous bias (Supplement)  -----------------------
+# ~ Heterogeneous bias (data not shown in paper)  -----------------------
 # the 1.03 is chosen to come close to Flegal
 confounded_meta( method = "parametric",
                  q = log(1.1),
